@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BioRhyme:wght@200;300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Aboreto&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Main Background */
+  --color-background: hsl(236 65% 7%);
+  --color-foreground: hsl(0 0% 95%);
+
+  /* Cards / Surfaces */
+  --color-card: hsl(236 40% 10%);
+  --color-card-foreground: hsl(0 0% 95%);
+
+  /* Popovers */
+  --color-popover: hsl(236 40% 10%);
+  --color-popover-foreground: hsl(0 0% 95%);
+
+  /* Brand Gradient Base */
+  --color-primary: hsl(262 83% 65%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary Surfaces */
+  --color-secondary: hsl(236 30% 14%);
+  --color-secondary-foreground: hsl(0 0% 92%);
+
+  /* Muted Areas */
+  --color-muted: hsl(236 22% 17%);
+  --color-muted-foreground: hsl(240 5% 65%);
+
+  /* Accent */
+  --color-accent: hsl(320 80% 60%);
+  --color-accent-foreground: hsl(0 0% 100%);
+
+  /* Borders / Inputs */
+  --color-border: hsl(236 22% 20%);
+  --color-input: hsl(236 22% 20%);
+  --color-ring: hsl(262 83% 65%);
+
+  /* Radius */
+  --radius: 1rem;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  min-height: 100vh;
+  font-family: Geist, sans-serif;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+h1 {
+  font-family: "BioRhyme", Arial, Helvetica, sans-serif;
+}
+
+@theme inline {
+  --animate-meteor-effect: meteor 5s linear infinite;
+
+  @keyframes meteor {
+    0% {
+      transform: rotate(215deg) translateX(0);
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      transform: rotate(215deg) translateX(-500px);
+      opacity: 0;
+    }
+  }
+}
+

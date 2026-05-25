@@ -1,0 +1,66 @@
+{
+  "short_name": "moodiary",
+  "name": "moodiary — Smart Mood Tracker & Reflection Diary",
+  "description": "Log your daily energy baselines, track your mental spectrum in color, write reflection notes, and build healthy consistency streaks.",
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "orientation": "portrait-primary",
+  "categories": ["health", "lifestyle", "utilities"],
+  "theme_color": "#090d16",
+  "background_color": "#090d16",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "favicon-96x96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any"
+    },
+    {
+      "src": "web-app-manifest-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "web-app-manifest-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Log Today's Mood",
+      "short_name": "Log Mood",
+      "description": "Instantly record your mental energy check-in for today",
+      "url": "/feed?action=log",
+      "icons": [{ "src": "favicon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "View Network",
+      "short_name": "Network",
+      "description": "Check in on your friend cluster node updates",
+      "url": "/network",
+      "icons": [{ "src": "favicon-96x96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/mobile-feed.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Your Daily Consistency Grid & Mood Feed"
+    },
+    {
+      "src": "screenshots/desktop-analytics.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Deep Diagnostic Performance Waveforms"
+    }
+  ]
+}
