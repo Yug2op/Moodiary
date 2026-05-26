@@ -1,16 +1,6 @@
 "use client";
 import React from 'react'
 import { motion } from "framer-motion";
-
-import {
-  Smile,
-  Flame,
-  BarChart3,
-  BrainCircuit,
-  ShieldCheck,
-  Sparkles,
-  Home
-} from "lucide-react";
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { FlipWords } from '@/components/ui/flip-words';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -102,24 +92,45 @@ const HomePage = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="mt-6 grid grid-cols-2 gap-3 max-w-lg w-full text-left sm:grid-cols-3 sm:max-w-2xl"
+            className="mt-6 grid grid-cols-1 gap-3 max-w-lg w-full text-left sm:grid-cols-3 sm:max-w-2xl"
           >
-            <div className="p-3.5 rounded-xl border border-neutral-200 bg-white/5 backdrop-blur-sm dark:border-neutral-800/60">
-              <span className="text-base sm:text-lg">📊</span>
-              <h3 className="text-xs font-semibold mt-1 text-foreground">Color Spectrum</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal">Visualize your inner state over a fluid dynamic scale.</p>
+            {/* Card 1: Color Spectrum */}
+            <div className="flex flex-col items-start p-4 rounded-xl border border-neutral-800/60 bg-transparent dark:border-neutral-800/60 w-full text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-base sm:text-lg">📊</span>
+                <h3 className="text-xs font-semibold text-foreground tracking-wide">
+                  Color Spectrum
+                </h3>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 leading-normal pl-0.5">
+                Visualize your inner state over a fluid dynamic scale.
+              </p>
             </div>
 
-            <div className="p-3.5 rounded-xl border border-neutral-200 bg-white/5 backdrop-blur-sm dark:border-neutral-800/60">
-              <span className="text-base sm:text-lg">⚡</span>
-              <h3 className="text-xs font-semibold mt-1 text-foreground">Consistency Grid</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal">Form positive validation loops with streak mapping.</p>
+            {/* Card 2: Secure Reflections */}
+            <div className="flex flex-col items-start p-4 rounded-xl border border-neutral-800/60 bg-transparent dark:border-neutral-800/60 w-full text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-base sm:text-lg">🔒</span>
+                <h3 className="text-xs font-semibold text-foreground tracking-wide">
+                  Secure Reflections
+                </h3>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 leading-normal pl-0.5">
+                Your personal logs are private and secure.
+              </p>
             </div>
 
-            <div className="col-span-2 sm:col-span-1 p-3.5 rounded-xl border border-neutral-200 bg-white/5 backdrop-blur-sm dark:border-neutral-800/60 text-center sm:text-left">
-              <span className="text-base sm:text-lg">🔒</span>
-              <h3 className="text-xs font-semibold mt-1 text-foreground">Secure Reflections</h3>
-              <p className="text-[10px] text-muted-foreground mt-0.5 leading-normal">Your personal logs are private and secure.</p>
+            {/* Card 3: Consistency Grid */}
+            <div className="flex flex-col items-start p-4 rounded-xl border border-neutral-800/60 bg-transparent dark:border-neutral-800/60 w-full text-left">
+              <div className="flex items-center gap-2">
+                <span className="text-base sm:text-lg">⚡</span>
+                <h3 className="text-xs font-semibold text-foreground tracking-wide">
+                  Consistency Grid
+                </h3>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 leading-normal pl-0.5">
+                Form positive validation loops with streak mapping.
+              </p>
             </div>
           </motion.div>
 

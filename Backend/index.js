@@ -130,7 +130,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/search", searchUsersRoutes);
 
 // CRITICAL FOR VERCEL: Only listen if not running in a serverless environment
-if (process.env.NODE_ENV !== "production") {
+if (process.env.ON_RENDER === "YES") {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 }
