@@ -94,7 +94,7 @@ export default function MoodEntryPage() {
 
             if (res?.success && res?.contributionGrid) {
                 const grid = res.contributionGrid;
-                const existingToday = Object.values(grid).find(day => day.date === todayStr && day.hasLogged);
+                const existingToday = Object.values(grid).find(day => {day.date === todayStr && day.hasLogged, console.log(day,day.date,todayStr);});
 
                 // ⚡ Move the check to the top so it only runs if we actually have an entry!
                 if (existingToday && existingToday.moodDetails) {
