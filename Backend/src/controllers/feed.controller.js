@@ -31,6 +31,9 @@ export const getFriendsFeed = async (req, res) => {
 
     // 4. Construct the query filters
     const targetUsers = Array.isArray(user.friends) ? [...user.friends, userId] : [userId];
+
+    console.log("LOGGED IN USER:", userId);
+    console.log("FINAL TARGET ARRAY:", targetUsers);
     const queryFilter = {
       user: { $in: targetUsers },
       date: databaseDateString,
@@ -43,11 +46,11 @@ export const getFriendsFeed = async (req, res) => {
         .select("rating note emoji date createdAt user reactions") // 💡 Light payload optimization
         .populate("user", "username avatar currentStreak longestStreak")
         .populate("reactions", "emoji user")
-        .sort({ createdAt: -1 }) 
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .lean(), 
-      
+        .lean(),
+
       MoodEntry.countDocuments(queryFilter)
     ]);
 
