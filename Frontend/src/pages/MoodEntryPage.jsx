@@ -3,9 +3,8 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, Heart, Smile, Sparkles, MessageSquare } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, Smile, MessageSquare } from "lucide-react";
 import { analyticsAPI, moodAPI } from "../apis";
-import { Button } from "@/components/ui/stateful-button";
 
 const MOOD_PRESETS = [
     {
@@ -76,6 +75,7 @@ export default function MoodEntryPage() {
     const [submitting, setSubmitting] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
 
+
     // Core Form Processing Hooks
     const [rating, setRating] = useState(6);
     const [moodName, setMoodName] = useState("Calm");
@@ -89,6 +89,8 @@ export default function MoodEntryPage() {
         try {
             setLoading(true);
             const res = await analyticsAPI.getSummary();
+                console.log(res);
+
 
             if (res?.success && res?.contributionGrid) {
                 const grid = res.contributionGrid;

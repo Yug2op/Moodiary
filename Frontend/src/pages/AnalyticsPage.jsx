@@ -8,10 +8,12 @@ import { IconChartBar } from "@tabler/icons-react";
 export default function AnalyticsPage() {
   const [summaryData, setSummaryData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("trends"); // "trends" | "distribution"
+  const [activeTab, setActiveTab] = useState("trends"); 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const scrollContainerRef = useRef(null);
+
+  console.log(summaryData);
 
   // 1. Data Fetcher Handshake
   const fetchDashboardData = useCallback(async () => {
