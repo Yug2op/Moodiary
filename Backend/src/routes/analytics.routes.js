@@ -5,7 +5,9 @@ import { getUserAnalyticsSummary, last10Entries } from "../controllers/analytics
 
 const router = express.Router();
 
-router.get("/dashboard-summary", protectRoute, getUserAnalyticsSummary);
-router.get("/lastUpdates", protectRoute, last10Entries);
+router.use(protectRoute);
+
+router.get("/dashboard-summary", getUserAnalyticsSummary);
+router.get("/lastUpdates", last10Entries);
 
 export default router;

@@ -5,7 +5,8 @@ import { toggleMoodReaction } from "../controllers/reaction.controller.js";
 
 const router = express.Router();
 
-// Protected toggle action: payload syntax -> POST /api/moods/react/6a12adf6... with { "emoji": "❤️" }
-router.post("/react/:moodId", protectRoute, toggleMoodReaction);
+router.use(protectRoute);
+
+router.post("/react/:moodId", toggleMoodReaction);
 
 export default router;

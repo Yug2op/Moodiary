@@ -5,6 +5,8 @@ import { getFriendsFeed } from "../controllers/feed.controller.js";
 const router = express.Router();
 
 // Secure route - requires active user context
-router.get("/friends-today", protectRoute, getFriendsFeed);
+router.use(protectRoute);
+
+router.get("/friends-today", getFriendsFeed);
 
 export default router;
