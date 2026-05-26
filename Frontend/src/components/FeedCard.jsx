@@ -3,15 +3,22 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Smile, Flame } from "lucide-react";
-import { Meteors } from "@/components/ui/meteors"; // 🌌 Imported your background effect
+import { Meteors } from "@/components/ui/meteors"; 
 import LazyEmojiPicker from "./LazyEmojiPicker";
 
-export default function FeedCard({ post, activeReactionTray, setActiveReactionTray, onReactionToggle }) {
+// 💡 ADDED `currentUserId` to the destructured props
+export default function FeedCard({ 
+  post, 
+  currentUserId, 
+  activeReactionTray, 
+  setActiveReactionTray, 
+  onReactionToggle 
+}) {
   if (!post || !post.user) return null;
 
-  const currentUserId = post.user?._id || "";
+  // Clean string conversion of the viewer's ID
+  const viewerId = currentUserId?.toString() || "";
 
-  // Dynamic status evaluation matched to your theme spectrum
   const getRatingStyles = (rating) => {
     if (rating >= 8) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.1)]";
     if (rating >= 5) return "bg-amber-500/10 text-amber-400 border-amber-500/20";
@@ -25,24 +32,25 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
       acc[current.emoji] = { emoji: current.emoji, count: 0, users: [] };
     }
     acc[current.emoji].count += 1;
-    acc[current.emoji].users.push(current.user?.toString());
+    
+    // Track who reacted
+    const reactorId = current.user?._id ? current.user._id.toString() : current.user?.toString();
+    if (reactorId) {
+      acc[current.emoji].users.push(reactorId);
+    }
+    
     return acc;
   }, {});
 
   return (
     <div className="relative w-full max-w-md mx-auto group">
-      
-      {/* 🔮 BACKGROUND GLOW: Replaced generic red/teal with your brand primary & accent tokens */}
       <div className="absolute inset-0 h-full w-full scale-[0.92] transform rounded-full bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl transition-all duration-500 group-hover:scale-[0.98] group-hover:opacity-25" />
 
-      {/* 🌌 MAIN CARD LAYOUT CONTAINER */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-border bg-card/70 p-5 shadow-xl backdrop-blur-xl transition-all duration-300 group-hover:border-border/80"
       >
-        
-        {/* UPPER CONTEXT HEADER */}
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -64,28 +72,23 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
               </h3>
               <p className="text-[10px] text-muted-foreground/90 font-light mt-0.5 flex items-center gap-1">
                 <span>{post.emoji}</span>
-                <span className="capitalize tracking-wide">{post.note.split(":")[0] || ""}</span>
+                <span className="capitalize tracking-wide">{post.note?.split(":")[0] || ""}</span>
               </p>
             </div>
           </div>
 
-          {/* Dynamic Score Badge */}
           <span className={`text-[11px] font-black px-2.5 py-1 rounded-xl border tracking-tighter relative z-10 ${getRatingStyles(post.rating)}`}>
             {post.rating}.0
           </span>
         </div>
 
-        {/* NARRATIVE REFLECTION SPACE */}
         {post.note && (
           <p className="relative z-10 text-xs font-light text-foreground/85 leading-relaxed pl-0.5 mt-4 mb-2">
             {post.note}
           </p>
         )}
 
-        {/* INTERACTION ACTION TRAY */}
         <div className="relative z-10 pt-3 mt-auto border-t border-border/40 flex flex-wrap items-center gap-1.5">
-          
-          {/* Reaction Opener Button */}
           <button
             onClick={() => setActiveReactionTray(activeReactionTray === post._id ? null : post._id)}
             className={`h-7 w-7 rounded-xl flex items-center justify-center transition-all border ${
@@ -97,7 +100,6 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
             <Smile className="h-3.5 w-3.5" />
           </button>
 
-          {/* Ceiling Engine Output */}
           {(() => {
             const badges = Object.values(groupedReactions);
             const sortedBadges = badges.sort((a, b) => b.count - a.count);
@@ -107,19 +109,21 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
             return (
               <>
                 {visibleBadges.map((reaction) => {
-                  const hasMeReacted = reaction.users.includes(currentUserId) || reaction.users.includes("me");
+                  // 🎯 FIX: Checking against the logged-in viewer's ID now!
+                  const hasMeReacted = reaction.users.includes(viewerId);
+                  
                   return (
                     <button
                       key={reaction.emoji}
                       onClick={() => onReactionToggle(post._id, reaction.emoji)}
                       className={`h-7 px-2.5 rounded-xl border flex items-center gap-1.5 text-[11px] font-medium transition-all active:scale-95 ${
                         hasMeReacted
-                          ? "bg-primary/15 border-primary/40 text-primary shadow-inner"
-                          : "bg-secondary/50 border-border/60 text-foreground/90"
+                          ? "bg-primary/25 border-primary text-primary scale-105 shadow-md font-bold"
+                          : "bg-secondary/50 border-border/60 text-foreground/90 hover:bg-secondary/80"
                       }`}
                     >
                       <span>{reaction.emoji}</span>
-                      <span className={`text-[10px] ${hasMeReacted ? "font-bold text-primary" : "text-muted-foreground"}`}>
+                      <span className={`text-[10px] ${hasMeReacted ? "text-primary font-black" : "text-muted-foreground"}`}>
                         {reaction.count}
                       </span>
                     </button>
@@ -137,11 +141,11 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
         </div>
         <Meteors number={10} />
       </motion.div>
+      
       {createPortal(
         <AnimatePresence>
           {activeReactionTray === post._id && (
             <>
-              {/* Dim Backdrop layer */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -150,7 +154,6 @@ export default function FeedCard({ post, activeReactionTray, setActiveReactionTr
                 onClick={() => setActiveReactionTray(null)}
               />
 
-              {/* Bottom Drawer */}
               <motion.div
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}

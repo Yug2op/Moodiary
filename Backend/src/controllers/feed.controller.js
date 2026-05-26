@@ -30,8 +30,9 @@ export const getFriendsFeed = async (req, res) => {
     const databaseDateString = getStartOfDay();
 
     // 4. Construct the query filters
+    const targetUsers = Array.isArray(user.friends) ? [...user.friends, userId] : [userId];
     const queryFilter = {
-      user: { $in: user.friends },
+      user: { $in: targetUsers },
       date: databaseDateString,
       isPrivate: false
     };
@@ -39,7 +40,7 @@ export const getFriendsFeed = async (req, res) => {
     // 5. Execute paginated query and total count calculation in parallel
     const [feed, totalCount] = await Promise.all([
       MoodEntry.find(queryFilter)
-        .select("rating note emoji date createdAt") // 💡 Light payload optimization
+        .select("rating note emoji date createdAt user reactions") // 💡 Light payload optimization
         .populate("user", "username avatar currentStreak longestStreak")
         .populate("reactions", "emoji user")
         .sort({ createdAt: -1 }) 
@@ -54,6 +55,7 @@ export const getFriendsFeed = async (req, res) => {
 
     return res.status(200).json({
       success: true,
+      currentUserId: userId,
       feed,
       pagination: {
         currentPage: page,
@@ -64,7 +66,7 @@ export const getFriendsFeed = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Fetch Scaled Feed Error:", error);
+    console.error("Get Friends Feed Error:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

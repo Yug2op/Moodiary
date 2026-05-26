@@ -11,6 +11,7 @@ export default function FeedPage() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeReactionTray, setActiveReactionTray] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const observer = useRef();
 
@@ -20,6 +21,7 @@ export default function FeedPage() {
     try {
       const data = await feedAPI.getFriendsToday(pageNum, 10);
       if (data?.success) {
+        setCurrentUserId(data?.currentUserId);
         setPosts((prev) => (isRefresh ? data.feed : [...prev, ...data.feed]));
         setHasMore(data.feed?.length === 10 && data.pagination?.hasNextPage !== false);
       }
@@ -131,6 +133,7 @@ export default function FeedPage() {
             <div key={post._id} ref={posts.length === index + 1 ? lastPostElementRef : null}>
               <FeedCard
                 post={post}
+                currentUserId={currentUserId}
                 activeReactionTray={activeReactionTray}
                 setActiveReactionTray={setActiveReactionTray}
                 onReactionToggle={handleReactionToggle}
