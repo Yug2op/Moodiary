@@ -10,7 +10,7 @@ const generateTokenAndSetCookie = (req, res, userId) => {
   res.cookie("token", token, {
     httpOnly: true, // Blocks JavaScript access (stops XSS)
     secure: process.env.NODE_ENV === "production", // Forces HTTPS in production
-    sameSite: "strict", // Protects against CSRF attacks
+    sameSite: "none", // Protects against CSRF attacks
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days in milliseconds
   });
 };
@@ -87,7 +87,6 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    // Clear cookie instantly by setting maxAge to 0
     res.cookie("token", "", {
       httpOnly: true,
       expires: new Date(0),
