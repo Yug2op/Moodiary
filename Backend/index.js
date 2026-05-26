@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
+import connectDB from "./src/config/db.js";
 
 // Route Imports (Moved to the top)
 import authRoutes from "./src/routes/auth.routes.js";
@@ -13,6 +14,7 @@ import reactionRoutes from "./src/routes/reaction.routes.js";
 import analyticsRoutes from "./src/routes/analytics.routes.js";
 import profileRoutes from "./src/routes/profile.routes.js";
 import searchUsersRoutes from "./src/routes/searchUsers.routes.js";
+
 
 dotenv.config();
 const app = express();
@@ -28,9 +30,7 @@ app.use(cors({
 // Database Connection
 // NOTE: Serverless environments spin up/down frequently. 
 // Mongoose caches connections natively, but ensure your URI is stable.
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected to MongoDB Grid"))
-  .catch((err) => console.error("DB Connection Error:", err));
+connectDB();
 
 // Route Registration
 app.get("/", (req, res) => {
