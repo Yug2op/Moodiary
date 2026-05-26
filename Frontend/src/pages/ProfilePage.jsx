@@ -3,12 +3,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { createPortal } from "react-dom";
-import { 
-  LogOut, Flame, Trophy, Calendar, 
-  Smile, Loader2, ShieldAlert, 
+import {
+  LogOut, Flame, Trophy, Calendar,
+  Smile, Loader2, ShieldAlert,
   Smartphone, Users, Edit2, Camera
 } from "lucide-react";
-import { analyticsAPI, authAPI, profileAPI } from "../apis"; 
+import { analyticsAPI, authAPI, profileAPI } from "../apis";
+import { subscribeUserNotifications } from "@/utils/subscribeToNotifications";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function ProfilePage() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  
+
   // New States for Profile Editing Engine Drawer
   const [showEditModal, setShowEditModal] = useState(false);
   const [editUsername, setEditUsername] = useState("");
@@ -88,7 +89,7 @@ export default function ProfilePage() {
     e.preventDefault();
     try {
       setUpdatingProfile(true);
-      
+
       const formData = new FormData();
       formData.append("username", editUsername.trim());
       formData.append("phone", editPhone.trim());
@@ -143,7 +144,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground pb-28">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
-        
+
         {/* UPPER METEOR BRANDED ROW ACCOMPANIED WITH SIGN OUT BUTTON TRIGGER */}
         <div className="flex items-center justify-between border-b border-border/40 pb-4">
           <h1 className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
@@ -161,9 +162,9 @@ export default function ProfilePage() {
         {/* PROFILE HEADER CARD WITH INTEGRATED RADIAL GRADIENT GLOWS */}
         <div className="relative group overflow-hidden rounded-[1.5rem] border border-border bg-card/40 p-5 shadow-xl backdrop-blur-xl">
           <div className="absolute inset-0 h-full w-full scale-[0.85] transform rounded-full bg-gradient-to-br from-primary to-accent opacity-15 blur-3xl" />
-          
+
           {/* Floating Edit Button Overlay Target */}
-          <button 
+          <button
             onClick={() => setShowEditModal(true)}
             className="absolute top-4 right-4 h-7 w-7 rounded-lg bg-secondary/80 border border-border/40 text-muted-foreground hover:text-foreground flex items-center justify-center transition-all active:scale-90 cursor-pointer z-20"
             type="button"
@@ -198,6 +199,25 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
+        </div>
+
+        <div className="bg-card border border-border p-4 rounded-2xl flex flex-col justify-between space-y-3 shadow-sm">
+          <div>
+            <h4 className="text-xs font-bold text-foreground">Reminders Status</h4>
+            <p className="text-[10px] text-muted-foreground font-light mt-0.5">
+              Enable daily alerts to preserve your active logging consistency metrics.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={async () => {
+              const success = await subscribeUserNotifications();
+              if (success) alert("Daily streak configuration alert metrics are online! 🔥");
+            }}
+            className="w-full h-9 text-[11px] font-bold rounded-xl border border-primary/20 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground active:scale-95 transition-all cursor-pointer"
+          >
+            Enable Daily Alerts
+          </button>
         </div>
 
         {/* GRID STRUCTURE HOUSING GAMIFIED ANALYTICS METRIC INDICATORS */}
@@ -242,8 +262,8 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-2.5">
               {history.map((log) => (
-                <div 
-                  key={log._id} 
+                <div
+                  key={log._id}
                   className="bg-card/40 border border-border/60 rounded-xl p-3.5 flex items-start justify-between gap-4 transition-colors hover:border-border"
                 >
                   <div className="space-y-1">
@@ -348,30 +368,30 @@ export default function ProfilePage() {
                 className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-popover border-t border-border rounded-t-[2rem] shadow-2xl z-50 overflow-hidden p-6 pb-safe"
               >
                 <div className="w-10 h-1 bg-muted rounded-full mx-auto mb-4" />
-                
+
                 <div className="text-center pb-2">
                   <h4 className="text-sm font-black tracking-tight text-foreground">Update Profile</h4>
                   <p className="text-[10px] text-muted-foreground font-light mt-0.5">Update your profile information</p>
                 </div>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-4 mt-2">
-                  
+
                   {/* AVATAR INTERACTIVE FILE UPLOADER CONTROLLER */}
                   <div className="flex flex-col items-center justify-center pt-1">
                     <div className="relative group/avatar h-16 w-16 rounded-2xl overflow-hidden border border-border/80 bg-secondary">
-                      <img 
-                        src={avatarPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"} 
-                        alt="Preview" 
+                      <img
+                        src={avatarPreview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"}
+                        alt="Preview"
                         className="h-full w-full object-cover"
                       />
                       <label className="absolute inset-0 bg-black/50 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[9px] font-bold cursor-pointer gap-1">
                         <Camera className="h-3 w-3" />
                         <span>Upload</span>
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          onChange={handleAvatarChange} 
-                          className="hidden" 
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarChange}
+                          className="hidden"
                         />
                       </label>
                     </div>
@@ -380,8 +400,8 @@ export default function ProfilePage() {
                   {/* USERNAME RAW ALIAS FIELD */}
                   <div className="bg-card/50 border border-border/80 rounded-xl p-3 space-y-0.5">
                     <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-wider">Username Handle</span>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={editUsername}
                       onChange={(e) => setEditUsername(e.target.value)}
                       required

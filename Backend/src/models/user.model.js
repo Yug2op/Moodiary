@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       minlength: [3, "Username must be at least 3 characters long"],
-      index: true, 
+      index: true,
     },
     phone: {
       type: String,
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "", 
+      default: "",
     },
     currentStreak: {
       type: Number,
@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    notificationSubscription: {
+      type: Object, // Stores the target endpoints, auth keys, and p256dh keys from browser
+      default: null
+    }
   },
   {
     timestamps: true,
