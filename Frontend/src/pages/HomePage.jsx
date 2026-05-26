@@ -165,13 +165,13 @@ const HomePage = () => {
               duration: 0.5,
               delay: 0.6,
             }}
-            className="mt-6 flex flex-col items-center justify-center gap-3.5 w-full sm:flex-row sm:w-auto sm:gap-4"
+            className="mt-6 flex w-full flex-col items-center justify-center gap-3.5 sm:w-auto sm:flex-row sm:gap-4"
           >
             <button
-              className="group w-full rounded-2xl border-1 border-background bg-gradient-to-r from-[#8b5cf6] via-[#ec4899] to-[#f97316] px-8 py-3.5 font-medium text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
-              onClick={() => navigate("/auth")}
+              className="group w-full rounded-2xl border border-background bg-gradient-to-r from-[#8b5cf6] via-[#ec4899] to-[#f97316] px-8 py-3.5 font-medium text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
+              onClick={() => navigate(isLoggedIn ? "/feed" : "/auth")}
             >
-              Start Your Journey
+              {isLoggedIn ? "Go to Feed" : "Start Your Journey"}
             </button>
           </motion.div>
         </section>
