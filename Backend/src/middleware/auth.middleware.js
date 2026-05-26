@@ -8,8 +8,8 @@ export const protectRoute = async (req, res, next) => {
     if (!token) {
       return res.status(401).json({ 
         success: false, 
-        message: "Unauthorised - no token provided",
-        debugLogs: {
+        message:  {
+          message: "Unauthorized 1 - No token found",
           receivedCookies: req.cookies,
           headersReceived: req.headers["user-agent"],
           originUrl: req.originalUrl
