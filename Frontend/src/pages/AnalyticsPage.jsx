@@ -1,7 +1,7 @@
 // src/pages/AnalyticsPage.jsx
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, TrendingUp, Award, Calendar, Heart, TreeDeciduous } from "lucide-react";
+import { Loader2, TrendingUp, Award, Calendar, Heart } from "lucide-react";
 import { analyticsAPI } from "../apis";
 import { IconChartBar } from "@tabler/icons-react";
 
@@ -12,8 +12,6 @@ export default function AnalyticsPage() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const scrollContainerRef = useRef(null);
-
-  console.log(summaryData);
 
   // 1. Data Fetcher Handshake
   const fetchDashboardData = useCallback(async () => {
@@ -57,7 +55,6 @@ export default function AnalyticsPage() {
   const monthAvg = summary.monthlyAverage || 0;
 
   const deltaVibe = weekAvg - monthAvg;
-  const isTrendingUp = deltaVibe >= 0;
 
   const overallStatus = useMemo(() => {
     if (weekAvg >= 8) return { label: "Thriving", desc: "Your system metrics are operating at peak levels.", color: "text-emerald-400" };
@@ -83,7 +80,9 @@ export default function AnalyticsPage() {
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
     return rawArray.map((day) => {
-      const dateObj = new Date(day.date);
+      const dateParts = day.date.split("-");
+      const dateObj = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]));
+      
       const score = day.hasLogged && day.moodDetails ? Number(day.moodDetails.rating) * 10 : 0;
       return {
         day: dayNames[dateObj.getDay()],
@@ -493,12 +492,15 @@ export default function AnalyticsPage() {
               <div className="absolute -top-12 -right-12 h-24 w-24 bg-primary/10 blur-xl rounded-full pointer-events-none" />
               <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold block">Day Inspection Log</span>
               <h4 className="text-sm font-black text-foreground mt-1">
-                {new Date(selectedDay.dateStr).toLocaleDateString(undefined, {
-                  weekday: "long",
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric"
-                })}
+                {(() => {
+                  const parts = selectedDay.dateStr.split("-");
+                  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric"
+                  });
+                })()}
               </h4>
 
               <div className="my-4 w-full text-left">

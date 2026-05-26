@@ -117,6 +117,20 @@ export default function ProfilePage() {
     return "border-rose-500/30 text-rose-400 bg-rose-500/5";
   };
 
+  // Safe localized text formatter helper to prevent mid-night drift bugs on mobile screens
+  const formatLocalDateString = (dateStr) => {
+    if (!dateStr) return "Unknown";
+    if (dateStr.includes("-")) {
+      const parts = dateStr.split("-");
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+    return new Date(dateStr).toLocaleDateString();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen w-full bg-background flex flex-col items-center justify-center text-xs text-muted-foreground gap-3">
@@ -175,7 +189,8 @@ export default function ProfilePage() {
               </p>
               <p className="text-[10px] text-muted-foreground font-light mt-0.5 flex items-center gap-1.5">
                 <Smile className="h-2.5 w-2.5" />
-                <span>Last Mood: {profile?.lastMoodDate ? new Date(profile.lastMoodDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "Unknown"}</span>
+                {/* 🎯 FIX: Formatted stored database lastMoodDate string parameter dynamically */}
+                <span>Last Mood: {profile?.lastMoodDate ? formatLocalDateString(profile.lastMoodDate) : "Unknown"}</span>
               </p>
               <p className="text-[10px] text-muted-foreground font-light mt-0.5 flex items-center gap-1.5">
                 <Users className="h-2.5 w-2.5" />
@@ -241,7 +256,8 @@ export default function ProfilePage() {
                       </p>
                     )}
                     <span className="text-[9px] text-muted-foreground/70 block pt-0.5 font-light">
-                      {new Date(log.date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      {/* 🎯 FIX: Safely parse localized string index arrays instead of passing raw string values to new Date() */}
+                      {formatLocalDateString(log.date)}
                     </span>
                     <span className="text-[7px] text-muted-foreground/70 block pt-0.5 font-light">
                       {log.reactions?.length || 0} reaction{log.reactions?.length !== 1 ? "s" : ""}

@@ -19,6 +19,7 @@ export default function FeedPage() {
     if (loading) return;
     setLoading(true);
     try {
+      // 💡 NOTE: This maps directly to your newly repaired timezone-locked backend controller!
       const data = await feedAPI.getFriendsToday(pageNum, 10);
       if (data?.success) {
         setCurrentUserId(data?.currentUserId);
@@ -112,6 +113,7 @@ export default function FeedPage() {
           <button
             onClick={handleRefresh}
             className="p-2.5 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground active:scale-95 transition-all shadow-sm"
+            type="button"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>

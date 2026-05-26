@@ -1,7 +1,8 @@
 // controllers/feed.controller.js
 import { MoodEntry } from "../models/reaction.model.js";
 import { User } from "../models/user.model.js";
-import { getStartOfDay } from "../utils/getStartOfDay.js";
+// 🎯 FIX: Adjusted import statement to reference the correct timezone-safe utility function name
+import { getStandardizedToday } from "../utils/getStandardizedToday.js";
 
 export const getFriendsFeed = async (req, res) => {
   try {
@@ -26,8 +27,8 @@ export const getFriendsFeed = async (req, res) => {
       });
     }
 
-    // 3. Match your exact database string date format
-    const databaseDateString = getStartOfDay();
+    // 3. 🎯 FIX: Match your exact database string date format using the universal timezone-safe helper
+    const databaseDateString = getStandardizedToday();
 
     // 4. Construct the query filters
     const targetUsers = Array.isArray(user.friends) ? [...user.friends, userId] : [userId];

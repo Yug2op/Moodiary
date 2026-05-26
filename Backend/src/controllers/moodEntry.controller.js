@@ -1,7 +1,7 @@
 import { MoodEntry } from "../models/reaction.model.js";
 import { User } from "../models/user.model.js";
-import { getStartOfDay } from "../utils/getStartOfDay.js";
-
+// 🎯 FIX: Adjusted named import statement to grab the correct utility function token
+import { getStandardizedToday } from "../utils/getStandardizedToday.js";
 
 export const createOrUpdateMood = async (req, res) => {
   try {
@@ -22,15 +22,14 @@ export const createOrUpdateMood = async (req, res) => {
       });
     }
 
-    // Get today's standardized date structure
-    const todayDateObj = getStartOfDay();
-
+    // 🎯 FIX: Retrieve today's standardized format string cleanly ("YYYY-MM-DD")
+    const todayDateStr = getStandardizedToday();
     const userId = req.user._id;
 
     // Fetch user and existing daily mood log in parallel
     const [user, existingMood] = await Promise.all([
       User.findById(userId),
-      MoodEntry.findOne({ user: userId, date: todayDateObj })
+      MoodEntry.findOne({ user: userId, date: todayDateStr })
     ]);
 
     if (!user) {
@@ -60,43 +59,50 @@ export const createOrUpdateMood = async (req, res) => {
         rating,
         note: note || "",
         emoji: emoji || "",
-        date: todayDateObj,
+        date: todayDateStr, // Always stores matching standardized schema expectations
       });
 
       message = "Mood added successfully";
       statusCode = 201;
 
-    if (!user.lastMoodDate) {
-      user.currentStreak = 1;
-    } else {
-      // 1. Normalize both dates into clean string shapes for exact structural comparison
-      const lastMoodDateStr = new Date(user.lastMoodDate).toISOString().split('T')[0];
-      const todayDateStr = new Date(todayDateObj).toISOString().split('T')[0];
-
-      // 2. Build a fresh Date object based on today's midnight mark to subtract exactly 1 calendar day
-      const yesterday = new Date(todayDateObj);
-      yesterday.setDate(yesterday.getDate() - 1); // 🧠 Drops date back safely without breaking on month boundaries
-      const yesterdayDateStr = yesterday.toISOString().split('T')[0];
-
-      if (lastMoodDateStr === yesterdayDateStr) {
-        user.currentStreak += 1;
-      } else if (lastMoodDateStr === todayDateStr) {
-        
-      } else {
-
+      if (!user.lastMoodDate) {
+        // First entry initializing the chain baseline
         user.currentStreak = 1;
+      } else {
+        // 🎯 FIX: Safely parse stored baseline strings without using raw .toISOString() mutation traps
+        const lastMoodDateStr = user.lastMoodDate; // Already stored in database as "YYYY-MM-DD"
+
+        // Calculate a safe calendar midpoint object matching your anchor day
+        const currentAnchor = new Date(todayDateStr);
+        
+        // Subtract precisely 24 hours of timestamp duration values to establish calendar "yesterday"
+        const yesterdayObj = new Date(currentAnchor.setDate(currentAnchor.getDate() - 1));
+        
+        const year = yesterdayObj.getFullYear();
+        const month = String(yesterdayObj.getMonth() + 1).padStart(2, '0');
+        const day = String(yesterdayObj.getDate()).padStart(2, '0');
+        const yesterdayDateStr = `${year}-${month}-${day}`;
+
+        // 🧠 Strict logic evaluation to check if streak advances, holds, or resets
+        if (lastMoodDateStr === yesterdayDateStr) {
+          user.currentStreak += 1;
+        } else if (lastMoodDateStr === todayDateStr) {
+          // If they are writing an unexpected entry or double-logging a clean stream, preserve current index
+        } else {
+          // If a calendar gap is detected, fallback safely to reset metrics anchor
+          user.currentStreak = 1;
+        }
       }
-    }
 
-    // Automatically check and push longestStreak benchmark up
-    if (user.currentStreak > user.longestStreak) {
-      user.longestStreak = user.currentStreak;
-    }
+      // Automatically check and push longestStreak benchmark up
+      if (user.currentStreak > user.longestStreak) {
+        user.longestStreak = user.currentStreak;
+      }
 
-    // Store back to field as string representation
-    user.lastMoodDate = todayDateObj;
-    await user.save();
-  }
+      // Store back to field as string representation
+      user.lastMoodDate = todayDateStr;
+      await user.save();
+    }
 
     return res.status(statusCode).json({
       success: true,
