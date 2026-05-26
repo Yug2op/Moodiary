@@ -57,10 +57,30 @@ const HomePage = () => {
         </div>
 
         {/* Main Section - Centered cleanly on mobile viewports using flex growth */}
-        <section className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-6 py-8 text-center md:py-28 md:flex-initial">
+        <section className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-6 py-8 text-center md:py-16 md:flex-initial">
+
+
+          {/* Modern Glassmorphism Pill Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white/50 px-4 py-1.5 text-xs font-medium backdrop-blur-md transition-all dark:border-neutral-800 dark:bg-orange-400/80 md:mb-8"
+          >
+            {/* Animated Ping Indicator */}
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75 dark:bg-background"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500 dark:bg-background"></span>
+            </span>
+
+            {/* Pill Text */}
+            <span className="tracking-wider uppercase text-foreground dark:text-background font-semibold text-[10px] sm:text-xs">
+              Introducing Moodiary
+            </span>
+          </motion.div>
 
           {/* Heading */}
-          <h1 className="relative z-10 mx-auto max-w-6xl font-light tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-7xl leading-[1.25] md:leading-tight text-neutral-800 dark:text-foreground">
+          <h1 className="relative z-10 mx-auto max-w-6xl font-light tracking-tight text-3xl sm:text-4xl md:text-5xl lg:text-7xl leading-[1.25] md:leading-tight text-foreground dark:text-foreground">
             Your emotions deserve a space. Track your{" "}
             <span className="block mt-1 sm:inline-block">
               <FlipWords
@@ -70,6 +90,7 @@ const HomePage = () => {
               />
             </span>
           </h1>
+
 
           {/* Subtitle */}
           <motion.p
