@@ -1,37 +1,23 @@
 import mongoose from "mongoose";
 
-// Global is used here to maintain a cached connection across serverless hot-reloads
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false, 
-    };
-
-    console.log("Creating new MongoDB connection pool...");
-    cached.promise = mongoose.connect(process.env.MONGODB_URI, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-
+const connectDB = async () => {
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    console.error("MongoDB connection failed:", e.message);
-    throw e;
-  }
+    const connString = process.env.MONGODB_URI || process.env.MONGO_URI;
+    
+    if (!connString) {
+      console.error("❌ Error: MONGO_URI environment variable is missing!");
+      process.exit(1);
+    }
 
-  return cached.conn;
-}
+    // Connect directly to the database instance
+    const conn = await mongoose.connect(connString);
+    
+    console.log(`🚀 MongoDB Connected Successfully: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`❌ Database Connection Error: ${error.message}`);
+    // Exit the server process with a failure code if the database connection fails
+    process.exit(1); 
+  }
+};
 
 export default connectDB;
