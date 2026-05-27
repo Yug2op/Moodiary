@@ -7,11 +7,11 @@ self.addEventListener("push", (event) => {
         const options = {
             body: data.body,
             icon: data.icon || "/web-app-manifest-192x192.png",
-            badge: "/web-app-manifest-192x192.png",
-            vibrate: [200, 100, 200], // Custom vibration pattern for Android phones
-            data: { url: "/mood-entry" }, // Where to open when tapped
-
-            sound: "/notification.mp3"
+            badge: "/badge.png",
+            tag: "daily-mood-reminder",
+            renotify: true,
+            vibrate: [300, 100, 300, 100, 400], // Custom vibration pattern for Android phones
+            data: { url: "/mood" }, // Where to open when tapped
         };
 
         event.waitUntil(
