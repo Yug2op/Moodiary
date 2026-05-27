@@ -9,6 +9,7 @@ self.addEventListener("push", (event) => {
             icon: data.icon || "/web-app-manifest-512x512.png",
             badge: "/web-app-manifest-512x512.png",
             tag: `mood-alert-${Date.now()}`,
+            renotify: true,
             data: { url: "/mood" }, // Where to open when tapped
         };
 
