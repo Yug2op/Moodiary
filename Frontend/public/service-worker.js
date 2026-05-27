@@ -7,9 +7,11 @@ self.addEventListener("push", (event) => {
         const options = {
             body: data.body,
             icon: data.icon || "/web-app-manifest-512x512.png",
-            badge: "/web-app-manifest-512x512.png",
+            badge: "/badge.png",
             tag: `mood-alert-${Date.now()}`,
             renotify: true,
+            vibrate: [300, 100, 300, 100, 400],
+            sound: "/notification.mp3",
             data: { url: "/mood" }, // Where to open when tapped
         };
 
