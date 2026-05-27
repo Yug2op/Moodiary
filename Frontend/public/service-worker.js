@@ -6,9 +6,9 @@ self.addEventListener("push", (event) => {
 
         const options = {
             body: data.body,
-            icon: data.icon || "/web-app-manifest-192x192.png",
+            icon: data.icon || "/web-app-manifest-512x512.png",
             badge: "/og-banner.png",
-            vibrate: [300, 100, 300, 100, 400], // Custom vibration pattern for Android phones
+            tag: `mood-alert-${Date.now()}`,
             data: { url: "/mood" }, // Where to open when tapped
         };
 
