@@ -28,34 +28,43 @@ export const checkAndSendDailyNotifications = async (req, res) => {
   try {
     const todayStr = getStandardizedToday();
     
-    // Find users who have enabled notifications BUT haven't updated their mood log date today
     const targets = await User.find({
-      notificationSubscription: { $ne: null },
-      lastMoodDate: { $ne: todayStr }
-    });
-
-    const notificationPayload = JSON.stringify({
-      title: "Log Your Mood! 🌸",
-      body: "Keep your daily streak alive. Take 10 seconds to save your energy check-in.",
-      icon: "/web-app-manifest-192x192.png", // Path to your frontend public folder asset logo
+      notificationSubscription: { $ne: null }
     });
 
     // Send requests in parallel across users
     await Promise.all(
-      targets.map(user => 
-        webpush.sendNotification(user.notificationSubscription, notificationPayload)
-          .catch(err => {
-            if (err.statusCode === 410) {
-              // User uninstalled PWA or revoked permission, clean up database record safely
-              user.notificationSubscription = null;
-              return user.save();
-            }
-            console.error("Push delivery failure dropped line:", err.message);
-          })
-      )
+      targets.map(async (user) => {
+        // Check if this specific user already logged their mood today
+        const hasLoggedToday = user.lastMoodDate === todayStr;
+
+        // Dynamic payload text based on their logging state
+        const notificationPayload = JSON.stringify({
+          title: hasLoggedToday ? "Mood Changed? 🔄" : "Log Your Mood! 🌸",
+          body: hasLoggedToday 
+            ? "Your energy levels can change throughout the day. Tap to quickly update your mood!"
+            : "Keep your daily streak alive. Take 10 seconds to save your energy check-in.",
+          icon: "/web-app-manifest-512x512.png",
+        });
+
+        try {
+          await webpush.sendNotification(user.notificationSubscription, notificationPayload);
+        } catch (err) {
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            // Clean up expired or revoked permissions safely
+            user.notificationSubscription = null;
+            await user.save();
+          } else {
+            console.error(`Push delivery failure for user ${user._id}:`, err.message);
+          }
+        }
+      })
     );
 
-    return res.status(200).json({ success: true, message: `Dispatched logs to ${targets.length} targets.` });
+    return res.status(200).json({ 
+      success: true, 
+      message: `Processed and dispatched dynamic notifications to ${targets.length} targets.` 
+    });
   } catch (error) {
     console.error("Cron Notification Error:", error);
     return res.status(500).json({ success: false });

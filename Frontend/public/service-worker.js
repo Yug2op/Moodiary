@@ -7,7 +7,7 @@ self.addEventListener("push", (event) => {
         const options = {
             body: data.body,
             icon: data.icon || "/web-app-manifest-512x512.png",
-            badge: "/og-banner.png",
+            badge: "/web-app-manifest-512x512.png",
             tag: `mood-alert-${Date.now()}`,
             data: { url: "/mood" }, // Where to open when tapped
         };
