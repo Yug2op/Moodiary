@@ -3,10 +3,11 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, ArrowLeft, Heart, Smile, MessageSquare } from "lucide-react";
+import { Loader2, ArrowLeft, Heart, Smile, MessageSquare, Sparkles } from "lucide-react";
 import { analyticsAPI, moodAPI } from "../apis";
 // 🎯 FIX: Explicitly import your new timezone-safe generator utility
-import { getStandardizedToday } from "../utils/getStandardizedToday"; 
+import { getStandardizedToday } from "../utils/getStandardizedToday";
+import { aiAPI } from "../apis/index";
 
 const MOOD_PRESETS = [
   {
@@ -82,6 +83,7 @@ export default function MoodEntryPage() {
   const [moodName, setMoodName] = useState("Calm");
   const [emoji, setEmoji] = useState("😌");
   const [note, setNote] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
 
   // 🎯 FIX: Unified timezone-safe anchor initialization mapping
   const todayStr = useMemo(() => getStandardizedToday(), []);
@@ -94,7 +96,7 @@ export default function MoodEntryPage() {
 
       if (res?.success && res?.contributionGrid) {
         const grid = res.contributionGrid;
-        
+
         // 🎯 FIX: Repaired the evaluation arrow function syntax and omitted the broken bracket leak blocks
         const existingToday = Object.values(grid).find(day => day.date === todayStr && day.hasLogged);
 
@@ -164,6 +166,22 @@ export default function MoodEntryPage() {
       setSubmitting(false);
     }
   };
+  const handleAIRefine = async () => {
+    const trimmedNote = note.trim();
+    if (!trimmedNote) return;
+    if (note.length < 30) return alert("Add at least 30 characters of text to refine with AI because AI needs proper context to know your mood better.");
+    try {
+      setIsRefining(true);
+      const res = await aiAPI.refineNote(note);
+      if (res?.success && res?.refinedNote) {
+        setNote(res.refinedNote); // Replace text with the clean AI rewrite
+      }
+    } catch (err) {
+      console.error("AI text optimization request rejected:", err);
+    } finally {
+      setIsRefining(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -216,7 +234,7 @@ export default function MoodEntryPage() {
                     className={`py-2 px-1 rounded-xl border text-center flex flex-col items-center justify-center transition-all duration-150 active:scale-95 min-w-0 cursor-pointer ${isActive
                       ? `${preset.color} ring-1 ring-primary/40 font-bold scale-105 shadow-md`
                       : "border-border/40 bg-card text-muted-foreground/70 opacity-80"
-                    }`}
+                      }`}
                   >
                     <span className="text-base leading-none">{preset.emoji}</span>
                     <span className="text-[8px] tracking-tight mt-1 font-semibold truncate w-full max-w-full block capitalize">
@@ -232,7 +250,7 @@ export default function MoodEntryPage() {
           <div className="bg-card border border-border/80 rounded-[1.5rem] p-4 space-y-3 shadow-xl">
             <div className="flex items-center justify-between min-w-0">
               <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Heart className="h-3 w-3 text-accent" /> Your mood level 
+                <Heart className="h-3 w-3 text-accent" /> Your mood level
               </span>
               <span className="text-xs font-black text-foreground bg-secondary/60 border border-border/20 px-2 py-0.5 rounded-md shrink-0">
                 {rating}.0 / 10
@@ -294,9 +312,28 @@ export default function MoodEntryPage() {
 
           {/* STEP D: REFLECTION TEXTAREA ENTRY BOX BLOCK */}
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1.5 px-1">
-              <MessageSquare className="h-3 w-3 text-primary" /> Your Mood Reflection
-            </label>
+            <div className="flex justify-between items-center w-full mb-2">
+              {/* Left Column: Label */}
+              <label className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1.5 px-1">
+                <MessageSquare className="h-3 w-3 text-primary" />
+                Your Mood Reflection
+              </label>
+
+              {/* Right Column: Interactive AI Action Trigger */}
+              <button
+                type="button"
+                disabled={isRefining || !note.trim()}
+                onClick={handleAIRefine}
+                className="h-6 px-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-bold text-[9px] uppercase tracking-wider flex items-center gap-1 hover:bg-indigo-500/20 active:scale-95 disabled:opacity-40 transition-all cursor-pointer"
+              >
+                {isRefining ? (
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-2.5 w-2.5" />
+                )}
+                {isRefining ? "Refining..." : "Refine with AI"}
+              </button>
+            </div>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}

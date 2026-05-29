@@ -1,4 +1,14 @@
 // public/sw.js
+
+self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+  console.log("🌐 SW Fetch Request:", url);
+  if (url.href.includes("/api/")) {
+    return; 
+  }
+});
+
+
 self.addEventListener("push", (event) => {
     if (!event.data) return;
     try {

@@ -6,7 +6,9 @@ import { createPortal } from "react-dom";
 import {
   LogOut, Flame, Trophy, Calendar,
   Smile, Loader2, ShieldAlert,
-  Smartphone, Users, Edit2, Camera
+  Smartphone, Users, Edit2, Camera,
+  ArrowLeft,
+  UserCircle
 } from "lucide-react";
 import { analyticsAPI, authAPI, profileAPI } from "../apis";
 import { subscribeUserNotifications } from "@/utils/subscribeToNotifications";
@@ -64,8 +66,10 @@ export default function ProfilePage() {
   // Handle systemic authentication breakdown and logout
   const handleLogout = async () => {
     try {
-      await authAPI.logout();
-      localStorage.clear();
+      const res = await authAPI.logout();
+      if (res?.success) {
+        localStorage.clear();
+      }
     } catch (err) {
       console.warn("Backend cookie clearance partial network drop:", err);
     } finally {
@@ -145,14 +149,29 @@ export default function ProfilePage() {
     <div className="min-h-screen w-full bg-background text-foreground pb-28">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
 
-        {/* UPPER METEOR BRANDED ROW ACCOMPANIED WITH SIGN OUT BUTTON TRIGGER */}
-        <div className="flex items-center justify-between border-b border-border/40 pb-4">
-          <h1 className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
-            Profile
-          </h1>
+        <div className="flex items-center justify-between pb-2 border-b border-border/30 w-full">
+          {/* Left: Back Navigation Target */}
+          <button
+            onClick={() => navigate(-1)}
+            className="h-8 w-8 rounded-xl border border-border/40 bg-secondary/20 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
+            type="button"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Center: Absolute Center Title Matrix */}
+          <div className="flex flex-col items-center text-center">
+            <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
+              <UserCircle className="h-4 w-4 text-primary" /> Profile
+            </h1>
+            {/* empty:hidden removes empty spacing bugs if no subtitle text exists */}
+            <p className="text-[11px] text-muted-foreground font-light mt-0.5 empty:hidden"></p>
+          </div>
+
+          {/* Right: Logout Action Trigger (Symmetric to Left Button) */}
           <button
             onClick={() => setShowLogoutConfirm(true)}
-            className="p-2.5 rounded-xl bg-card border border-border text-rose-400/90 hover:text-rose-400 active:scale-95 transition-all shadow-sm cursor-pointer"
+            className="h-8 w-8 rounded-xl bg-card border border-border text-rose-400/90 hover:text-rose-400 active:scale-95 transition-all shadow-sm flex items-center justify-center cursor-pointer"
             type="button"
           >
             <LogOut className="h-3.5 w-3.5" />

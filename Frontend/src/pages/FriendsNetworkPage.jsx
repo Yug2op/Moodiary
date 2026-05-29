@@ -9,9 +9,11 @@ import {
     Loader2,
     Compass,
     Inbox,
-    Check
+    Check,
+    ArrowLeft
 } from "lucide-react";
 import { friendsAPI } from "../apis/friends";
+import { useNavigate } from "react-router-dom";
 
 export default function FriendsNetworkPage() {
     const [activeTab, setActiveTab] = useState("discover"); // "discover" | "requests" | "network"
@@ -24,6 +26,7 @@ export default function FriendsNetworkPage() {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [friendsList, setFriendsList] = useState([]);
     const [sentRequests, setSentRequests] = useState([]);
+    const navigate = useNavigate();
 
     // Tracks inline loading state rows matching specific userIds or requestIds
     const [actioningId, setActioningId] = useState(null);
@@ -159,14 +162,23 @@ export default function FriendsNetworkPage() {
         <div className="min-h-screen w-full bg-background text-foreground pb-24 select-none">
             <div className="max-w-md mx-auto px-4 pt-6 space-y-5">
 
-                {/* HEADER BRANDING */}
-                <div className="border-b border-border/40 pb-3">
-                    <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
+                <div className="flex items-center justify-between pb-2 border-b border-border/30">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="h-8 w-8 rounded-xl border border-border/40 bg-secondary/20 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
+                        type="button"
+                    >
+                        <ArrowLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <div className="text-center">
+                        <h1 className="text-lg font-black tracking-tight flex items-center gap-2">
                         <Users className="h-4 w-4 text-primary" /> Friends Network
                     </h1>
-                    <p className="text-[11px] text-muted-foreground font-light mt-0.5">
+                        <p className="text-[11px] text-muted-foreground font-light mt-0.5">
                         Review and manage your friend connections
                     </p>
+                    </div>
+                    <div className="w-8 h-8 opacity-0" />
                 </div>
 
                 {/* WORKSPACE TAB SWITCH SEGMENTS */}

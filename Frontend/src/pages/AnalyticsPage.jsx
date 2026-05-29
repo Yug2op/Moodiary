@@ -1,18 +1,19 @@
 // src/pages/AnalyticsPage.jsx
 import React, { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, TrendingUp, Award, Calendar, Heart } from "lucide-react";
+import { Loader2, TrendingUp, Award, Calendar, Heart, ArrowLeft } from "lucide-react";
 import { analyticsAPI } from "../apis";
 import { IconChartBar } from "@tabler/icons-react";
+import { useNavigate } from "react-router-dom";
 
 export default function AnalyticsPage() {
   const [summaryData, setSummaryData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("trends"); 
+  const [activeTab, setActiveTab] = useState("trends");
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const scrollContainerRef = useRef(null);
-
+  const navigate = useNavigate();
   // 1. Data Fetcher Handshake
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -82,7 +83,7 @@ export default function AnalyticsPage() {
     return rawArray.map((day) => {
       const dateParts = day.date.split("-");
       const dateObj = new Date(Number(dateParts[0]), Number(dateParts[1]) - 1, Number(dateParts[2]));
-      
+
       const score = day.hasLogged && day.moodDetails ? Number(day.moodDetails.rating) * 10 : 0;
       return {
         day: dayNames[dateObj.getDay()],
@@ -169,15 +170,23 @@ export default function AnalyticsPage() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground pb-28">
       <div className="max-w-md mx-auto px-4 pt-6 space-y-6">
-
-        {/* HEADER BRANDING */}
-        <div className="border-b border-border/40 pb-4">
-          <h1 className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground">
-            Analytics Engine
-          </h1>
-          <p className="text-[11px] text-muted-foreground font-light mt-0.5">
-            Historical diagnostic review patterns.
-          </p>
+        <div className="flex items-center justify-between pb-2 border-b border-border/30">
+          <button
+            onClick={() => navigate(-1)}
+            className="h-8 w-8 rounded-xl border border-border/40 bg-secondary/20 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all active:scale-95 cursor-pointer"
+            type="button"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </button>
+          <div className="text-center">
+            <h1 className="text-sm font-black tracking-tight text-foreground/90">
+              Mood Analytics Engine
+            </h1>
+            <p className="text-[9px] text-muted-foreground font-light tracking-wider uppercase mt-0.5">
+              Historical mood review patterns.
+            </p>
+          </div>
+          <div className="w-8 h-8 opacity-0" />
         </div>
 
         {/* HIGH-VALUE CONTEXT STATUS BANNER */}
@@ -198,9 +207,8 @@ export default function AnalyticsPage() {
 
         {/* PROACTIVE AI RECOMMENDATIONS */}
         <div className="bg-card border border-border rounded-[1.5rem] p-5 space-y-4 relative overflow-hidden shadow-xl group">
-          <div className={`absolute top-0 left-0 h-full w-full opacity-[0.03] pointer-events-none transition-colors duration-500 ${
-            deltaVibe <= -1.0 ? "bg-rose-500" : "bg-primary"
-          }`} />
+          <div className={`absolute top-0 left-0 h-full w-full opacity-[0.03] pointer-events-none transition-colors duration-500 ${deltaVibe <= -1.0 ? "bg-rose-500" : "bg-primary"
+            }`} />
           <div className="flex items-center gap-2 text-muted-foreground">
             <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] uppercase font-bold tracking-wider">Strategic Recommendation</span>
@@ -282,9 +290,8 @@ export default function AnalyticsPage() {
                   <button
                     key={day.dateStr}
                     onClick={() => setSelectedDay(day)}
-                    className={`h-3 w-3 rounded-xs shrink-0 transition-all duration-150 outline-none border border-transparent cursor-pointer ${getContributionColor(day.rating)} ${
-                      isSelected ? "scale-125 ring-2 ring-primary/60 shadow-lg z-10" : "active:scale-90 hover:scale-110"
-                    }`}
+                    className={`h-3 w-3 rounded-xs shrink-0 transition-all duration-150 outline-none border border-transparent cursor-pointer ${getContributionColor(day.rating)} ${isSelected ? "scale-125 ring-2 ring-primary/60 shadow-lg z-10" : "active:scale-90 hover:scale-110"
+                      }`}
                     type="button"
                     aria-label={`Log for ${day.dateStr}`}
                   />
@@ -344,17 +351,15 @@ export default function AnalyticsPage() {
             <div className="flex rounded-xl bg-secondary/50 p-0.5 border border-border/10 shrink-0 select-none">
               <button
                 onClick={() => setActiveTab("trends")}
-                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95 ${
-                  activeTab === "trends" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95 ${activeTab === "trends" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 7d Flow
               </button>
               <button
                 onClick={() => setActiveTab("distribution")}
-                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95 ${
-                  activeTab === "distribution" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
+                className={`rounded-lg px-2.5 py-1.5 text-[10px] font-semibold transition-all active:scale-95 ${activeTab === "distribution" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 Dist
               </button>
