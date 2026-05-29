@@ -10,7 +10,7 @@ const generateTokenAndSetCookie = (req, res, userId) => {
   res.cookie("token", token, {
     httpOnly: true, // Blocks JavaScript access (stops XSS)
     secure: process.env.NODE_ENV === "production", // Forces HTTPS in production
-    sameSite: "none", // Protects against CSRF attacks
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Protects against CSRF attacks
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days in milliseconds
   });
 };
@@ -87,10 +87,17 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("token", "", {
       httpOnly: true,
-      expires: new Date(0),
+      expires: new Date(0), // Clears it immediately
+      
+      // ⚡ CRITICAL: These must match your generation script exactly to register the deletion
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
     });
+
     res.status(200).json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     res.status(500).json({ message: "Logout failed", error: error.message });

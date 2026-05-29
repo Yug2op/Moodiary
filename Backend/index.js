@@ -15,6 +15,7 @@ import analyticsRoutes from "./src/routes/analytics.routes.js";
 import profileRoutes from "./src/routes/profile.routes.js";
 import searchUsersRoutes from "./src/routes/searchUsers.routes.js";
 import notificationRoutes from "./src/routes/notification.routes.js";
+import aiRoutes from "./src/routes/ai.routes.js";
 
 
 dotenv.config();
@@ -130,6 +131,7 @@ app.use("/api/analytics", analyticsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/search", searchUsersRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/ai", aiRoutes);
 
 // CRITICAL FOR VERCEL: Only listen if not running in a serverless environment
 if (process.env.ON_RENDER === "YES") {
