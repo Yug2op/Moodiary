@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Smile, Flame } from "lucide-react";
 import { Meteors } from "@/components/ui/meteors"; 
 import LazyEmojiPicker from "./LazyEmojiPicker";
+import ReactMarkdown from 'react-markdown';
 
 // 💡 ADDED `currentUserId` to the destructured props
 export default function FeedCard({ 
@@ -83,9 +84,9 @@ export default function FeedCard({
         </div>
 
         {post.note && (
-          <p className="relative z-10 text-xs font-light text-foreground/85 leading-relaxed pl-0.5 mt-4 mb-2">
-            {post.note}
-          </p>
+          <div className="prose prose-stone relative z-10 text-xs font-light text-foreground/85 leading-relaxed pl-0.5 mt-4 mb-2">
+            <ReactMarkdown>{post.note}</ReactMarkdown>
+          </div>
         )}
 
         <div className="relative z-10 pt-3 mt-auto border-t border-border/40 flex flex-wrap items-center gap-1.5">

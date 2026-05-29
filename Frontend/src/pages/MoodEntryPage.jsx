@@ -177,6 +177,7 @@ export default function MoodEntryPage() {
         setNote(res.refinedNote); // Replace text with the clean AI rewrite
       }
     } catch (err) {
+      alert(err.message);
       console.error("AI text optimization request rejected:", err);
     } finally {
       setIsRefining(false);
