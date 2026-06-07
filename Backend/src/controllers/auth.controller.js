@@ -1,28 +1,21 @@
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
-// Helper utility to sign tokens and drop them into an HTTP-Only cookie
-const generateTokenAndSetCookie = (req, res, userId) => {
-  const token = jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: "7d",
+// ⚡ Security Matrix: Access tokens should be short-lived, Refresh tokens long-lived
+const ACCESS_TOKEN_EXPIRY = "15m"; 
+const REFRESH_TOKEN_EXPIRY = "30d";
+
+// Helper utility to sign tokens and return them cleanly in an object
+const generateTokens = (userId) => {
+  const accessToken = jwt.sign({ id: userId }, process.env.JWT_ACCESS_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRY,
   });
 
   const refreshToken = jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: "30d",
-  })
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+  });
 
-  res.cookie("token", token, {
-    httpOnly: true, // Blocks JavaScript access (stops XSS)
-    secure: process.env.NODE_ENV === "production", // Forces HTTPS in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Protects against CSRF attacks
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days in milliseconds
-  });
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true, // Blocks JavaScript access (stops XSS)
-    secure: process.env.NODE_ENV === "production", // Forces HTTPS in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Protects against CSRF attacks
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Days in milliseconds
-  });
+  return { accessToken, refreshToken };
 };
 
 export const signup = async (req, res) => {
@@ -33,20 +26,19 @@ export const signup = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ phone }, { username }] });
     if (existingUser) {
       return res.status(400).json({ message: "Username or phone already taken" });
     }
 
-    // Create new user (password is automatically hashed via Mongoose pre-save hook)
     const newUser = await User.create({ username, phone, password });
 
-    // Issue token and set cookie
-    generateTokenAndSetCookie(req, res, newUser._id);
-
-    res.status(201).json({
+    const { accessToken, refreshToken } = generateTokens(newUser._id);
+    
+    return res.status(201).json({
       success: true,
+      accessToken,
+      refreshToken,
       user: {
         id: newUser._id,
         username: newUser.username,
@@ -54,35 +46,34 @@ export const signup = async (req, res) => {
       },
     });
   } catch (error) {
-    res.json({ message: "Signup failed", error: error.message });
+    return res.status(500).json({ message: "Signup failed", error: error.message });
   }
 };
 
 export const login = async (req, res) => {
   try {
     const { phone, password } = req.body;
-    
+
     if (!phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    
-    // Find user by phone
+
     const user = await User.findOne({ phone });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
-    
-    // Verify password using schema instance method
+
     const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Issue token and refresh cookie timeline
-    generateTokenAndSetCookie(req, res, user._id);
-
-    res.status(200).json({
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    
+    return res.status(200).json({
       success: true,
+      accessToken,
+      refreshToken,
       user: {
         id: user._id,
         username: user.username,
@@ -91,73 +82,51 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error: error.message });
+    return res.status(500).json({ message: "Login failed", error: error.message });
   }
 };
 
 export const refreshAccessToken = async (req, res) => {
   try {
-    // Requires cookie-parser middleware to be active in server.js
-    const { refreshToken } = req.cookies;
+    const { refreshToken } = req.body;
 
     if (!refreshToken) {
       return res.status(401).json({ success: false, message: "Refresh token missing. Please sign in again." });
     }
 
-    // Verify token validity
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, async (err, decoded) => {
-      if (err) {
-        return res.status(403).json({ success: false, message: "Refresh token expired or invalid." });
-      }
+    // ⚡ FIX: Use linear verification. If it fails, it naturally triggers the catch block below.
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-      // Check if user still exists in DB
-      const user = await User.findById(decoded.id);
-      if (!user) {
-        return res.status(404).json({ success: false, message: "User account not found." });
-      }
+    // Check if user still exists in DB
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User account not found." });
+    }
 
-      // Generate a fresh short-lived access token
-      const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_SECRET, {
-        expiresIn: ACCESS_TOKEN_EXPIRY,
-      });
+    // Generate fresh tokens
+    const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_ACCESS_SECRET, {
+      expiresIn: ACCESS_TOKEN_EXPIRY,
+    });
 
-      // Reset the access cookie 
-      res.cookie("accessToken", newAccessToken, {
-        ...cookieOptions,
-        maxAge: ACCESS_COOKIE_MAX_AGE,
-      });
+    const newRefreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, {
+      expiresIn: REFRESH_TOKEN_EXPIRY,
+    });
 
-      return res.status(200).json({ success: true, message: "Access token synchronized successfully." });
+    return res.status(200).json({
+      success: true,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken
     });
 
   } catch (error) {
+    // Catch token expiration errors from jwt.verify explicitly and send a clean 403
+    if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
+      return res.status(403).json({ success: false, message: "Refresh token expired or invalid." });
+    }
     return res.status(500).json({ message: "Token rotation failed", error: error.message });
   }
 };
 
 export const logout = async (req, res) => {
-  try {
-    const isProduction = process.env.NODE_ENV === "production";
-
-    res.cookie("token", "", {
-      httpOnly: true,
-      expires: new Date(0), // Clears it immediately
-      
-      // ⚡ CRITICAL: These must match your generation script exactly to register the deletion
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-    });
-    res.cookie("refreshToken", "", {
-      httpOnly: true,
-      expires: new Date(0), // Clears it immediately
-      
-      // ⚡ CRITICAL: These must match your generation script exactly to register the deletion
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-    });
-
-    res.status(200).json({ success: true, message: "Logged out successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Logout failed", error: error.message });
-  }
+  return res.status(200).json({ success: true, message: "Logged out successfully" });
 };

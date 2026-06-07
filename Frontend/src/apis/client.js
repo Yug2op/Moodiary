@@ -3,15 +3,26 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-  withCredentials: true, // ⚡ CRITICAL: Allows cookies to pass between frontend and backend
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Flag to prevent multiple concurrent refresh calls if multiple requests fail at once
+// ⚡ Request Interceptor: Automatically inject Bearer Token on every single outgoing call
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 let isRefreshing = false;
-// Queue to hold failed requests while the token is refreshing
 let failedQueue = [];
 
 const processQueue = (error, token = null) => {
@@ -25,20 +36,18 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-// ⚡ Unified Response Interceptor
+// ⚡ Response Interceptor: Seamless token rotation handling
 api.interceptors.response.use(
   (response) => {
-    return response.data; // Strips standard Axios wrapper objects cleanly
+    return response.data;
   },
   async (error) => {
     const originalRequest = error.config;
 
-    // 1. Handle Expired Access Token (401)
     if (error.response?.status === 401 && !originalRequest._retry) {
       
-      // If the request that failed WAS the refresh endpoint itself, do not retry!
       if (originalRequest.url.includes("/auth/refresh") || originalRequest.url.includes("/auth/login")) {
-        localStorage.removeItem("isLoggedIn");
+        localStorage.clear();
         if (window.location.pathname !== "/auth") {
           window.location.href = "/auth";
         }
@@ -46,40 +55,47 @@ api.interceptors.response.use(
       }
 
       if (isRefreshing) {
-        // If a refresh is already in progress, queue this request up
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(() => {
-            return api(originalRequest); // Retry original request when queue resolves
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
           })
           .catch((err) => {
             return Promise.reject(err);
           });
       }
 
-      // Mark this request so we don't end up in an infinite retry loop
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        console.log("🔄 Access token expired. Attempting silent token refresh...");
+        const storedRefreshToken = localStorage.getItem("refreshToken");
         
-        // Call the refresh endpoint on the backend
-        await api.post("/auth/refresh");
-        
-        isRefreshing = false;
-        processQueue(null); // Resolve all pending requests in the queue
+        // ⚡ Pass the refresh token in the JSON body payload
+        const response = await axios.post(
+          `${api.defaults.baseURL}/auth/refresh`,
+          { refreshToken: storedRefreshToken }
+        );
 
-        // Retry the original request that failed
+        const { accessToken, refreshToken } = response.data;
+
+        // Save the fresh tokens
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        isRefreshing = false;
+        processQueue(null, accessToken);
+
+        // Update current failed request header and replay it
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
-        processQueue(refreshError, null); // Reject the queue
+        processQueue(refreshError, null);
 
-        console.warn("❌ Refresh token expired or invalid. Redirecting to login portal.");
-        localStorage.removeItem("isLoggedIn");
-        
+        localStorage.clear();
         if (window.location.pathname !== "/auth") {
           window.location.href = "/auth";
         }
@@ -87,12 +103,10 @@ api.interceptors.response.use(
       }
     }
 
-    // 2. Pass standard server errors (like 400 Bad Request or custom 503 errors) directly through
     if (error.response?.data) {
       return Promise.reject(error.response.data);
     }
-
-    return Promise.reject({ message: "Network connection error. Server might be down." });
+    return Promise.reject({ message: "Network connection error." });
   }
 );
 

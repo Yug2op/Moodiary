@@ -56,6 +56,8 @@ export default function AuthPage() {
         });
       }
       if (data?.success) {
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("isLoggedIn", "true");
         navigate("/feed");
       } else {
