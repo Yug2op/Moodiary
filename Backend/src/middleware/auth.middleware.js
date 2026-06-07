@@ -5,8 +5,6 @@ export const protectRoute = async (req, res, next) => {
   try {
     // ⚡ STEP 1: Grab the Authorization header instead of a cookie
     const authHeader = req.headers.authorization;
-    console.log(authHeader)
-
 
     // The header format is: "Bearer <token_string>"
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
