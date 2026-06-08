@@ -89,7 +89,7 @@ export default function MoodEntryPage() {
   const todayStr = useMemo(() => getStandardizedToday(), []);
 
   // 1. Handshake Grid to match if an entry exists for today
-  const checkExistingLog = async () => {
+  const checkExistingLog = useCallback(async () => {
     try {
       setLoading(true);
       const res = await analyticsAPI.getSummary();
@@ -130,7 +130,7 @@ export default function MoodEntryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [todayStr]);
 
   useEffect(() => {
     checkExistingLog();
